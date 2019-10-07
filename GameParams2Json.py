@@ -54,4 +54,4 @@ print('Writing data as "GameParams.json".')
 with codecs.open(output_file,'w',encoding='utf8') as f:
     f.write(json_data)
     f.close()
-input('Finished.')
+input('Finished. (Press enter to close)')
