@@ -1,10 +1,15 @@
-import json,struct,codecs,zlib,pickle,sys
+import json,struct,codecs,zlib,pickle,os
 
 data = []
 deflate = []
 decom = []
 pickle_data = []
 
+__location__ = os.path.realpath(
+    os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+input_file = os.path.join(__location__,'GameParams.data')
+output_file = os.path.join(__location__,'GameParams.json')    
 
 def has_dict(o):
 	try:
@@ -30,8 +35,9 @@ class GPEncode(json.JSONEncoder):
 							except:
 								pass
 			return o.__dict__
+
 print('Opening "GameParams.data".')
-with open('./GameParams.data', 'rb') as f:
+with open(input_file, 'rb') as f:
     byte = f.read(1)
     while byte:
         data.append(byte[0])
@@ -42,9 +48,10 @@ deflate = struct.pack('B'*len(data), *data[::-1])
 print('Decompressing data.')
 decom = zlib.decompress(deflate)
 pickle_data = pickle.loads(decom,encoding='MacCyrillic')
-print('Writing data as "GameParams.json".')
+print('Dumping data to json.')
 json_data = json.dumps(pickle_data,cls=GPEncode,sort_keys=True,indent=4,separators=(',', ': '))
-with open('./GameParams.json','w') as f:
+print('Writing data as "GameParams.json".')
+with codecs.open(output_file,'w',encoding='utf8') as f:
     f.write(json_data)
     f.close()
 print('Finished.')
