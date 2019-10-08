@@ -3,11 +3,7 @@ GameParams.data
 GameParams.json
 .vscode/
 .vscode/*
-.entities/
-.entities/*
-.__pycache__/
-.__pycache__/*
-entities/Ability.json
-entities/Achievement.json
-entities/Aircraft.json
-entities/BattleScript.json
+entities/
+entities/*
+__pycache__/
+__pycache__/*
