@@ -1,10 +1,5 @@
 import json,struct,codecs,zlib,pickle,os
 
-data = []
-deflate = []
-decom = []
-pickle_data = []
-
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -36,22 +31,37 @@ class GPEncode(json.JSONEncoder):
 								pass
 			return o.__dict__
 
-print('Opening "GameParams.data".')
-with open(input_file, 'rb') as f:
-    byte = f.read(1)
-    while byte:
-        data.append(byte[0])
-        byte = f.read(1)
-    f.close()
-print('Deflating data.')
-deflate = struct.pack('B'*len(data), *data[::-1])
-print('Decompressing data.')
-decom = zlib.decompress(deflate)
-pickle_data = pickle.loads(decom,encoding='MacCyrillic')
-print('Dumping data to json.')
-json_data = json.dumps(pickle_data,cls=GPEncode,sort_keys=True,indent=4,separators=(',', ': '))
-print('Writing data as "GameParams.json".')
-with codecs.open(output_file,'w',encoding='utf8') as f:
-    f.write(json_data)
-    f.close()
-input('Finished. (Press enter to close)')
+data = []
+
+def gp_to_json():
+	print('Opening "GameParams.data".')
+	with open(input_file, 'rb') as f:
+		byte = f.read(1)
+		while byte:
+			data.append(byte[0])
+			byte = f.read(1)
+		f.close()
+	print('Deflating data.')
+	deflate = struct.pack('B'*len(data), *data[::-1])
+	print('Decompressing data.')
+	decom = zlib.decompress(deflate)
+	pickle_data = pickle.loads(decom,encoding='MacCyrillic')
+	print('Dumping data to json.')
+	json_data = json.dumps(pickle_data,cls=GPEncode,sort_keys=True,indent=4,separators=(',', ': '))
+	print('Writing data as "GameParams.json".')
+	with codecs.open(output_file,'w',encoding='utf8') as f:
+		f.write(json_data)
+		f.close()
+	input('Finished. (Press enter to exit) ')
+
+if os.path.isfile(output_file):
+	print('File exists.')
+	while True:
+		user_input = input('GameParams.json already exists. Do you want to overwrite? (y/n): ').lower()
+		if 'y' == user_input:
+			gp_to_json()
+			break
+		elif 'n' == user_input:
+			break
+else:
+	gp_to_json()
