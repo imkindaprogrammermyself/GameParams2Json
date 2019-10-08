@@ -7,3 +7,7 @@ GameParams.json
 .entities/*
 .__pycache__/
 .__pycache__/*
+entities/Ability.json
+entities/Achievement.json
+entities/Aircraft.json
+entities/BattleScript.json

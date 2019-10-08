@@ -1,4 +1,4 @@
-import json,os,threading,queue
+import json,os,threading
 
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
