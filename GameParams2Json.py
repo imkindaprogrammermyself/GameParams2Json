@@ -31,6 +31,7 @@ def write_entities(data):
         except OSError:
             pass
     for _d in _value:
+        _d = dict(sorted(_d.items()))
         with open(os.path.join(_ent_dir, f"{_d['name']}.json"), "w") as ff:
             json.dump(_d, ff, indent=1)
 
