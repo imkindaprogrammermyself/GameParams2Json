@@ -21,7 +21,7 @@ class GPEncode(json.JSONEncoder):
             return {}
 
 
-def process_data(data):
+def write_entities(data):
     _key, _value = data
     _ent_dir = os.path.join(entities_dir, _key)
 
@@ -55,4 +55,4 @@ if __name__ == '__main__':
             entity_types[data_type] = [value]
 
     with ThreadPoolExecutor() as tpe:
-        tpe.map(process_data, [(k, v) for k, v in entity_types.items()])
+        tpe.map(write_entities, [(k, v) for k, v in entity_types.items()])
