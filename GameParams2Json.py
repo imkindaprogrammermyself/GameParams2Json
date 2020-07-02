@@ -1,67 +1,58 @@
-import json,struct,codecs,zlib,pickle,os
+import os
+import struct
+import zlib
+import pickle
+import json
+from concurrent.futures import ThreadPoolExecutor
 
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
-input_file = os.path.join(__location__,'GameParams.data')
-output_file = os.path.join(__location__,'GameParams.json')    
+entities_dir = os.path.join(__location__, "entities")
 
-def has_dict(o):
-	try:
-		o.__dict__
-		return True
-	except AttributeError:
-		return False
 
 class GPEncode(json.JSONEncoder):
-	def default(self, o): # pylint: disable=E0202
-		if has_dict(o):
-			t = o.__dict__
-			for key in t:
-				if isinstance(t[key], str):
-					try:
-						t[key].decode('utf8')
-					except:
-						try:
-							t[key] = t[key].decode('MacCyrillic')
-						except:
-							try:
-								t[key] = t[key].encode('hex')
-							except:
-								pass
-			return o.__dict__
+    def default(self, o):
+        try:
+            for e in ['Cameras', 'DockCamera', 'damageDistribution']:
+                o.__dict__.pop(e, o.__dict__)
+            return o.__dict__
+        except AttributeError:
+            return {}
 
-data = []
 
-def gp_to_json():
-	print('Opening "GameParams.data".')
-	with open(input_file, 'rb') as f:
-		byte = f.read(1)
-		while byte:
-			data.append(byte[0])
-			byte = f.read(1)
-		f.close()
-	print('Deflating data.')
-	deflate = struct.pack('B'*len(data), *data[::-1])
-	print('Decompressing data.')
-	decom = zlib.decompress(deflate)
-	pickle_data = pickle.loads(decom,encoding='MacCyrillic')
-	print('Dumping data to json.')
-	json_data = json.dumps(pickle_data,cls=GPEncode,sort_keys=True,indent=4,separators=(',', ': '))
-	print('Writing data as "GameParams.json".')
-	with codecs.open(output_file,'w',encoding='utf8') as f:
-		f.write(json_data)
-		f.close()
-	input('Finished. (Press enter to exit) ')
+def process_data(data):
+    _key, _value = data
+    _ent_dir = os.path.join(entities_dir, _key)
 
-if os.path.isfile(output_file):
-	print('File exists.')
-	while True:
-		user_input = input('GameParams.json already exists. Do you want to overwrite? (y/n): ').lower()
-		if 'y' == user_input:
-			gp_to_json()
-			break
-		elif 'n' == user_input:
-			break
-else:
-	gp_to_json()
+    if not os.path.exists(_ent_dir):
+        try:
+            os.makedirs(_ent_dir)
+        except OSError:
+            pass
+    for _d in _value:
+        with open(os.path.join(_ent_dir, f"{_d['name']}.json"), "w") as ff:
+            json.dump(_d, ff, indent=1)
+
+
+if __name__ == '__main__':
+    gp_file_path = os.path.join(__location__, 'GameParams.data')
+    with open(gp_file_path, "rb") as f:
+        gp_data: bytes = f.read()
+    gp_data: bytes = struct.pack('B' * len(gp_data), *gp_data[::-1])
+    gp_data: bytes = zlib.decompress(gp_data)
+    gp_data: dict = pickle.loads(gp_data, encoding='windows-1251')
+    gp_data: str = json.dumps(gp_data, cls=GPEncode, ensure_ascii=False)
+    gp_data: dict = json.loads(gp_data)
+
+    entity_types = {}
+
+    for index, value in gp_data.items():
+        data_type = value["typeinfo"]["type"]
+        try:
+            entity_types[data_type].append(value)
+        except KeyError:
+            entity_types[data_type] = [value]
+
+    with ThreadPoolExecutor() as tpe:
+        tpe.map(process_data, [(k, v) for k, v in entity_types.items()])
