@@ -3,4 +3,4 @@
 
  Run the script **GameParams2Json.py**. Make sure the **GameParams.data** and **GameParams.py** is in the same directory of the script.
 
- Run the script **GameParamsJson2Entities.py** to separate each entity types and write them to corresponding json files. Entities can be found at **entities** directory after running the script.
+It will create **entities** folder which has all the entities separated by types (with their respective folders.)
